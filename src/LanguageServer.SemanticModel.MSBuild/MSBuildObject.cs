@@ -30,7 +30,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         /// <summary>
         ///     A <see cref="Range"/> representing the span of text covered by the item's XML.
         /// </summary>
-        public Range XmlRange => Xml.Range;
+        public TextRange XmlRange => Xml.Range;
 
         /// <summary>
         ///     The object's name.

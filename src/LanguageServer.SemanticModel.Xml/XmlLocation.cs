@@ -16,16 +16,13 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         /// <param name="position">
         ///     The location's position, in line / column form.
         /// </param>
-        /// <param name="absolutePosition">
-        ///     The location's (0-based) absolute position.
-        /// </param>
         /// <param name="node">
         ///     The <see cref="XSNode"/> closest to the location's position.
         /// </param>
         /// <param name="flags">
         ///     <see cref="XmlLocationFlags"/> describing the location.
         /// </param>
-        public XmlLocation(Position position, int absolutePosition, XSNode node, XmlLocationFlags flags)
+        public XmlLocation(TextPosition position, XSNode node, XmlLocationFlags flags)
         {
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
@@ -34,7 +31,6 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                 throw new ArgumentNullException(nameof(node));
             
             Position = position;
-            AbsolutePosition = absolutePosition;
             Node = node;
             Flags = flags;
         }
@@ -42,12 +38,12 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         /// <summary>
         ///     The position, in line / column form.
         /// </summary>
-        public Position Position { get; }
+        public TextPosition Position { get; }
 
         /// <summary>
         ///     The (0-based) absolute position.
         /// </summary>
-        public int AbsolutePosition { get; }
+        public int AbsolutePosition => Position.AbsolutePosition;
 
         /// <summary>
         ///     The <see cref="XSNode"/> closest to the position.

@@ -13,12 +13,12 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     Create new <see cref="XSWhitespace"/>.
         /// </summary>
         /// <param name="range">
-        ///     The <see cref="Range"/>, within the source text, spanned by the whitespace.
+        ///     The <see cref="TextRange"/> spanned by the whitespace.
         /// </param>
         /// <param name="parent">
         ///     The <see cref="XSElement"/> that contains the whitespace.
         /// </param>
-        public XSWhitespace(Range range, XSElement parent)
+        public XSWhitespace(TextRange range, XSElement parent)
             : base(range)
         {
             if (parent == null)

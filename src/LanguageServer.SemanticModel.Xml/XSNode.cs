@@ -16,9 +16,9 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     Create a new <see cref="XSNode"/>.
         /// </summary>
         /// <param name="range">
-        ///     The <see cref="Range"/>, within the source text, spanned by the node.
+        ///     The <see cref="TextRange"/> spanned by the node.
         /// </param>
-        protected XSNode(Range range)
+        protected XSNode(TextRange range)
         {
             if (range == null)
                 throw new ArgumentNullException(nameof(range));
@@ -27,9 +27,9 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         }
 
         /// <summary>
-        ///     The <see cref="Range"/>, within the source text, spanned by the node.
+        ///     The <see cref="TextRange"/> spanned by the node.
         /// </summary>
-        public Range Range { get; }
+        public TextRange Range { get; }
 
         /// <summary>
         ///     The node's starting position.
@@ -76,7 +76,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
     public abstract class XSNode<TSyntax>
         : XSNode
         where TSyntax : SyntaxNode
-    {   
+    {
         /// <summary>
         ///     Create a new <see cref="XSNode{TSyntax}"/>.
         /// </summary>
@@ -84,9 +84,9 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     The <typeparamref name="TSyntax"/> represented by the <see cref="XSNode{TSyntax}"/>.
         /// </param>
         /// <param name="range">
-        ///     The <see cref="Range"/>, within the source text, spanned by the node.
+        ///     The <see cref="TextRange"/> spanned by the node.
         /// </param>
-        protected XSNode(TSyntax syntaxNode, Range range)
+        protected XSNode(TSyntax syntaxNode, TextRange range)
             : base(range)
         {
             if (syntaxNode == null)

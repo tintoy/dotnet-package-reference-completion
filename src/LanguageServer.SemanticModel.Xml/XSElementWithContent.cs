@@ -18,24 +18,24 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     The <see cref="XmlElementSyntax"/> represented by the <see cref="XSElementWithContent"/>.
         /// </param>
         /// <param name="range">
-        ///     The <see cref="Range"/>, within the source text, spanned by the element and its content.
+        ///     The <see cref="TextRange"/> spanned by the element and its content.
         /// </param>
         /// <param name="openingTagRange">
-        ///     The <see cref="Range"/>, within the source text, spanned by the element's opening tag.
+        ///     The <see cref="TextRange"/> spanned by the element's opening tag.
         /// </param>
         /// <param name="attributesRange">
         ///     The range, within the source text, spanned by the element's attributes.
         /// </param>
         /// <param name="contentRange">
-        ///     The <see cref="Range"/>, within the source text, spanned by the element's content.
+        ///     The <see cref="TextRange"/> spanned by the element's content.
         /// </param>
         /// <param name="closingTagRange">
-        ///     The <see cref="Range"/>, within the source text, spanned by the element's closing tag.
+        ///     The <see cref="TextRange"/> spanned by the element's closing tag.
         /// </param>
         /// <param name="parent">
         ///     The <see cref="XSElementWithContent"/>'s parent element (if any).
         /// </param>
-        public XSElementWithContent(XmlElementSyntax element, Range range, Range openingTagRange, Range attributesRange, Range contentRange, Range closingTagRange, XSElement parent)
+        public XSElementWithContent(XmlElementSyntax element, TextRange range, TextRange openingTagRange, TextRange attributesRange, TextRange contentRange, TextRange closingTagRange, XSElement parent)
             : base(element, range, attributesRange, parent)
         {
             if (openingTagRange == null)
@@ -58,19 +58,19 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         public new XmlElementSyntax ElementNode => (XmlElementSyntax)SyntaxNode;
 
         /// <summary>
-        ///     The <see cref="Range"/>, within the source text, spanned by the element's opening tag.
+        ///     The <see cref="TextRange"/> spanned by the element's opening tag.
         /// </summary>
-        public Range OpeningTagRange { get; }
+        public TextRange OpeningTagRange { get; }
 
         /// <summary>
-        ///     The <see cref="Range"/>, within the source text, spanned by the element's content.
+        ///     The <see cref="TextRange"/> spanned by the element's content.
         /// </summary>
-        public Range ContentRange { get; }
+        public TextRange ContentRange { get; }
 
         /// <summary>
-        ///     The <see cref="Range"/>, within the source text, spanned by the element's closing tag.
+        ///     The <see cref="TextRange"/> spanned by the element's closing tag.
         /// </summary>
-        public Range ClosingTagRange { get; }
+        public TextRange ClosingTagRange { get; }
 
         /// <summary>
         ///     The kind of XML node represented by the <see cref="XSNode"/>.

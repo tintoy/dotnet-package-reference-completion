@@ -54,6 +54,9 @@ namespace MSBuildProjectTools.LanguageServer.Utilities
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
 
+            if (position is TextPosition textPosition)
+                return textPosition.AbsolutePosition;
+
             position = position.ToZeroBased();
 
             return GetAbsolutePosition(position.LineNumber, position.ColumnNumber);
@@ -92,16 +95,16 @@ namespace MSBuildProjectTools.LanguageServer.Utilities
         ///     The absolute position (0-based).
         /// </param>
         /// <returns>
-        ///     The equivalent <see cref="Position"/> within the text.
+        ///     The equivalent <see cref="TextPosition"/>.
         /// </returns>
-        public Position GetPosition(int absolutePosition)
+        public TextPosition GetPosition(int absolutePosition)
         {
             int targetLine = Array.BinarySearch(_lineStartPositions, absolutePosition);
             if (targetLine < 0)
                 targetLine = ~targetLine - 1; // No match, so BinarySearch returns 2's complement of the following line index.
 
             // Internally, we're 0-based, but lines and columns are (by convention) 1-based.
-            return Position.FromZeroBased(
+            return TextPosition.FromZeroBased(this, absolutePosition,
                 lineNumber: targetLine,
                 columnNumber: absolutePosition - _lineStartPositions[targetLine]
             ).ToOneBased();
@@ -119,9 +122,9 @@ namespace MSBuildProjectTools.LanguageServer.Utilities
         /// <returns>
         ///     The <see cref="Range"/>.
         /// </returns>
-        public Range GetRange(int absoluteStartPosition, int absoluteEndPosition)
+        public TextRange GetRange(int absoluteStartPosition, int absoluteEndPosition)
         {
-            return new Range(
+            return new TextRange(
                 start: GetPosition(absoluteStartPosition),
                 end: GetPosition(absoluteEndPosition)
             );

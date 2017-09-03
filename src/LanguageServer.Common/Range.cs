@@ -184,7 +184,18 @@ namespace MSBuildProjectTools.LanguageServer
         /// </returns>
         public override int GetHashCode()
         {
-            return Start.GetHashCode() + 17 * End.GetHashCode();
+            int hashCode = 17;
+
+            unchecked
+            {
+                hashCode += Start.GetHashCode();
+                hashCode *= 37;
+
+                hashCode += End.GetHashCode();
+                hashCode *= 37;
+            }
+
+            return hashCode;
         }
 
         /// <summary>

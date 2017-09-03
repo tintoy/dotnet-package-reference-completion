@@ -157,7 +157,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                             if (whitespaceLength > 0)
                             {
                                 whitespace = new XSWhitespace(
-                                    range: new Range(
+                                    range: new TextRange(
                                         start: _textPositions.GetPosition(endOfNode),
                                         end: _textPositions.GetPosition(startOfNextNode)
                                     ),
@@ -178,7 +178,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                             if (whitespaceLength > 0)
                             {
                                 whitespace = new XSWhitespace(
-                                    range: new Range(
+                                    range: new TextRange(
                                         start: _textPositions.GetPosition(endOfNode),
                                         end: _textPositions.GetPosition(startOfNextNode)
                                     ),
@@ -198,7 +198,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                     if (whitespaceLength > 0)
                     {
                         whitespace = new XSWhitespace(
-                            range: new Range(
+                            range: new TextRange(
                                 start: _textPositions.GetPosition(endOfNode),
                                 end: _textPositions.GetPosition(startOfNextNode)
                             ),
@@ -273,14 +273,14 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
             /// </returns>
             public override SyntaxNode VisitXmlElement(XmlElementSyntax element)
             {
-                Range elementRange = element.Span.ToNative(_textPositions);
-                Range openingTagRange = element.StartTag?.Span.ToNative(_textPositions) ?? elementRange;
-                Range attributesRange = element.AttributesNode?.FullSpan.ToNative(_textPositions) ?? elementRange;
-                Range closingTagRange = element.EndTag?.Span.ToNative(_textPositions) ?? elementRange;
-                Range contentRange;
+                TextRange elementRange = element.Span.ToNative(_textPositions);
+                TextRange openingTagRange = element.StartTag?.Span.ToNative(_textPositions) ?? elementRange;
+                TextRange attributesRange = element.AttributesNode?.FullSpan.ToNative(_textPositions) ?? elementRange;
+                TextRange closingTagRange = element.EndTag?.Span.ToNative(_textPositions) ?? elementRange;
+                TextRange contentRange;
                 if (openingTagRange.End <= closingTagRange.Start)
                 {
-                    contentRange = new Range(
+                    contentRange = new TextRange(
                         start: openingTagRange.End,
                         end: closingTagRange.Start
                     );
@@ -298,7 +298,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                         xsElement = new XSInvalidElement(element, openingTagRange, attributesRange: openingTagRange, parent: CurrentElement, hasContent: false);
                     else if (element.EndTag.Width == 0) // <> after an element
                     {
-                        openingTagRange = new Range(
+                        openingTagRange = new TextRange(
                             _textPositions.GetPosition(element.Span.Start),
                             _textPositions.GetPosition(element.Span.Start + 1)
                         );
@@ -347,8 +347,8 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
             /// </returns>
             public override SyntaxNode VisitXmlEmptyElement(XmlEmptyElementSyntax emptyElement)
             {
-                Range elementRange = emptyElement.Span.ToNative(_textPositions);
-                Range attributesRange = emptyElement.AttributesNode?.FullSpan.ToNative(_textPositions) ?? elementRange;
+                TextRange elementRange = emptyElement.Span.ToNative(_textPositions);
+                TextRange attributesRange = emptyElement.AttributesNode?.FullSpan.ToNative(_textPositions) ?? elementRange;
 
                 XSElement xsElement;
                 if (String.IsNullOrWhiteSpace(emptyElement.Name))
@@ -383,9 +383,9 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                 if (!HaveCurrentElement)
                     return attribute;
 
-                Range attributeRange = attribute.Span.ToNative(_textPositions);
-                Range nameRange = attribute.NameNode?.Span.ToNative(_textPositions) ?? attributeRange;
-                Range valueRange = attribute.ValueNode?.Span.ToNative(_textPositions);
+                TextRange attributeRange = attribute.Span.ToNative(_textPositions);
+                TextRange nameRange = attribute.NameNode?.Span.ToNative(_textPositions) ?? attributeRange;
+                TextRange valueRange = attribute.ValueNode?.Span.ToNative(_textPositions);
                 if (valueRange != null && valueRange.End.ColumnNumber - valueRange.Start.ColumnNumber >= 2)
                     valueRange = valueRange.Transform(moveStartColumns: 1, moveEndColumns: -1); // Trim off quotes.
                 else
@@ -414,7 +414,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
             /// </returns>
             public override SyntaxNode VisitXmlText(XmlTextSyntax text)
             {
-                Range textRange = text.Span.ToNative(_textPositions);
+                TextRange textRange = text.Span.ToNative(_textPositions);
                 if (CurrentElement == null || !CurrentElement.Range.Contains(textRange))
                     return text;
 

@@ -16,12 +16,12 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     The <see cref="XmlTextSyntax"/> represented by the <see cref="XSElementText"/>.
         /// </param>
         /// <param name="range">
-        ///     The <see cref="Range"/>, within the source text, spanned by the text.
+        ///     The <see cref="TextRange"/> spanned by the text.
         /// </param>
         /// <param name="element">
         ///     The element whose content includes the text.
         /// </param>
-        public XSElementText(XmlTextSyntax textNode, Range range, XSElement element)
+        public XSElementText(XmlTextSyntax textNode, TextRange range, XSElement element)
             : base(textNode, range)
         {
             if (element == null)

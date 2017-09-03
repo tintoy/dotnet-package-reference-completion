@@ -22,17 +22,17 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         /// <returns>
         ///     The equivalent <see cref="Range"/>.
         /// </returns>
-        public static Range ToNative(this TextSpan span, TextPositions textPositions)
+        public static TextRange ToNative(this TextSpan span, TextPositions textPositions)
         {
             if (textPositions == null)
                 throw new ArgumentNullException(nameof(textPositions));
 
-            Position startPosition = textPositions.GetPosition(span.Start);
-            Position endPosition = textPositions.GetPosition(span.End);
+            TextPosition startPosition = textPositions.GetPosition(span.Start);
+            TextPosition endPosition = textPositions.GetPosition(span.End);
             if (endPosition.ColumnNumber == 0)
                 throw new InvalidOperationException("Should not happen anymore");
 
-            return new Range(startPosition, endPosition);
+            return new TextRange(startPosition, endPosition);
         }
     }
 }

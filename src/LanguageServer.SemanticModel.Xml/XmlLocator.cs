@@ -104,10 +104,12 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
                 }
             }
 
+            // FIXME: We're doubling-up on round-tripping effort here.
             int absolutePosition = _documentPositions.GetAbsolutePosition(position);
+            TextPosition textPosition = _documentPositions.GetPosition(absolutePosition);
 
             XmlLocationFlags flags = ComputeLocationFlags(nodeAtPosition, absolutePosition);
-            XmlLocation inspectionResult = new XmlLocation(position, absolutePosition, nodeAtPosition, flags);
+            XmlLocation inspectionResult = new XmlLocation(textPosition, nodeAtPosition, flags);
 
             return inspectionResult;
         }

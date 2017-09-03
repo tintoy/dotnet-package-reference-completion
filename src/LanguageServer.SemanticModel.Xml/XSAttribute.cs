@@ -19,15 +19,15 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     The element that contains the attribute.
         /// </param>
         /// <param name="attributeRange">
-        ///     The <see cref="Range"/>, within the source text, spanned by the attribute.
+        ///     The <see cref="TextRange"/> spanned by the attribute.
         /// </param>
         /// <param name="nameRange">
-        ///     The <see cref="Range"/>, within the source text, spanned by the attribute's name.
+        ///     The <see cref="TextRange"/> spanned by the attribute's name.
         /// </param>
         /// <param name="valueRange">
-        ///     The <see cref="Range"/>, within the source text, spanned by the attribute's value.
+        ///     The <see cref="TextRange"/> spanned by the attribute's value.
         /// </param>
-        public XSAttribute(XmlAttributeSyntax attribute, XSElement element, Range attributeRange, Range nameRange, Range valueRange)
+        public XSAttribute(XmlAttributeSyntax attribute, XSElement element, TextRange attributeRange, TextRange nameRange, TextRange valueRange)
             : base(attribute, attributeRange)
         {
             if (nameRange == null)
@@ -85,14 +85,14 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         public XSElement Element { get; }
 
         /// <summary>
-        ///     The <see cref="Range"/>, within the source text, spanned by the attribute's name.
+        ///     The <see cref="TextRange"/> spanned by the attribute's name.
         /// </summary>
-        public Range NameRange { get; }
+        public TextRange NameRange { get; }
 
         /// <summary>
-        ///     The <see cref="Range"/>, within the source text, spanned by the attribute's value.
+        ///     The <see cref="TextRange"/> spanned by the attribute's value.
         /// </summary>
-        public Range ValueRange { get; }
+        public TextRange ValueRange { get; }
 
         /// <summary>
         ///     The kind of XML node represented by the <see cref="XSNode"/>.

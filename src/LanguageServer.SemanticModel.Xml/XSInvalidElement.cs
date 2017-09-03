@@ -1,4 +1,4 @@
-﻿using Microsoft.Language.Xml;
+using Microsoft.Language.Xml;
 
 namespace MSBuildProjectTools.LanguageServer.SemanticModel
 {
@@ -15,10 +15,10 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         ///     The <see cref="XmlElementSyntaxBase"/> represented by the <see cref="XSInvalidElement"/>.
         /// </param>
         /// <param name="range">
-        ///     The <see cref="Range"/>, within the source text, spanned by the element.
+        ///     The <see cref="TextRange"/> spanned by the element.
         /// </param>
         /// <param name="attributesRange">
-        ///     The range, within the source text, spanned by the element's attributes.
+        ///     The <see cref="TextRange"/> spanned by the element's attributes.
         /// </param>
         /// <param name="parent">
         ///     The <see cref="XSInvalidElement"/>'s parent element (if any).
@@ -26,7 +26,7 @@ namespace MSBuildProjectTools.LanguageServer.SemanticModel
         /// <param name="hasContent">
         ///     Does the <see cref="XSInvalidElement"/> have any content (besides attributes)?
         /// </param>
-        public XSInvalidElement(XmlElementSyntaxBase element, Range range, Range attributesRange, XSElement parent, bool hasContent)
+        public XSInvalidElement(XmlElementSyntaxBase element, TextRange range, TextRange attributesRange, XSElement parent, bool hasContent)
             : base(element, range, attributesRange, parent)
         {
             HasContent = hasContent;

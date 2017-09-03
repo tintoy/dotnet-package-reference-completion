@@ -49,7 +49,7 @@ namespace MSBuildProjectTools.LanguageServer
         /// <param name="isZeroBased">
         ///     If true, then the position will be treated as 0-based.
         /// </param>
-        Position(int lineNumber, int columnNumber, bool isZeroBased)
+        protected Position(int lineNumber, int columnNumber, bool isZeroBased)
         {
             LineNumber = lineNumber;
             ColumnNumber = columnNumber;
@@ -148,7 +148,18 @@ namespace MSBuildProjectTools.LanguageServer
         /// </returns>
         public override int GetHashCode()
         {
-            return LineNumber * 100000 + ColumnNumber;
+            int hashCode = 17;
+
+            unchecked
+            {
+                hashCode += LineNumber.GetHashCode();
+                hashCode *= 37;
+
+                hashCode += ColumnNumber.GetHashCode();
+                hashCode *= 37;
+            }
+
+            return hashCode;
         }
 
         /// <summary>
@@ -160,7 +171,7 @@ namespace MSBuildProjectTools.LanguageServer
         /// <returns>
         ///     <c>true</c>, if the positions are equal; otherwise, <c>false</c>.
         /// </returns>
-        public bool Equals(Position other)
+        public virtual bool Equals(Position other)
         {
             if (other == null)
                 return false;
@@ -177,7 +188,7 @@ namespace MSBuildProjectTools.LanguageServer
         /// <returns>
         ///     0 if the positions are equal, greater than 0 if the other position is less than the current position, less than 0 if the other position is greater than the current position.
         /// </returns>
-        public int CompareTo(Position other)
+        public virtual int CompareTo(Position other)
         {
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
@@ -198,7 +209,7 @@ namespace MSBuildProjectTools.LanguageServer
         /// <returns>
         ///     0 if the positions is within the range, greater than 0 if the position lies after than range, less than 0 position lies before the range.
         /// </returns>
-        public int CompareTo(Range range)
+        public virtual int CompareTo(Range range)
         {
             if (range == null)
                 throw new ArgumentNullException(nameof(range));
@@ -230,7 +241,7 @@ namespace MSBuildProjectTools.LanguageServer
         /// <returns>
         ///     The converted position (or the existing position if it's already one-based).
         /// </returns>
-        public Position ToOneBased() => IsZeroBased ? new Position(LineNumber + 1, ColumnNumber + 1, false) : this;
+        public virtual Position ToOneBased() => IsZeroBased ? new Position(LineNumber + 1, ColumnNumber + 1, false) : this;
 
         /// <summary>
         ///     Convert the position to a zero-based position.
@@ -238,7 +249,7 @@ namespace MSBuildProjectTools.LanguageServer
         /// <returns>
         ///     The converted position (or the existing position if it's already zero-based).
         /// </returns>
-        public Position ToZeroBased() => IsOneBased ? new Position(LineNumber - 1, ColumnNumber - 1, true) : this;
+        public virtual Position ToZeroBased() => IsOneBased ? new Position(LineNumber - 1, ColumnNumber - 1, true) : this;
 
         /// <summary>
         ///     Create a new 0-based <see cref="Position"/>.
