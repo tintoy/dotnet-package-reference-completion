@@ -19,6 +19,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
     using CustomProtocol;
     using Documents;
     using SemanticModel;
+    using Serilog.Events;
     using Utilities;
 
     /// <summary>
@@ -44,7 +45,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
         {
             if (workspace == null)
                 throw new ArgumentNullException(nameof(workspace));
-            
+
             Workspace = workspace;
         }
 
@@ -156,7 +157,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
             Workspace.PublishDiagnostics(projectDocument);
 
             // Only enable expression-related language service facilities if they're using our custom "MSBuild" language type (rather than "XML").
-            projectDocument.EnableExpressions = parameters.TextDocument.LanguageId == "msbuild" && Workspace.Configuration.EnableExperimentalFeatures.Contains("expressions"); 
+            projectDocument.EnableExpressions = parameters.TextDocument.LanguageId == "msbuild" && Workspace.Configuration.EnableExperimentalFeatures.Contains("expressions");
 
             Server.ClearBusy("Project loaded.");
 
@@ -170,58 +171,61 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
             switch (projectDocument)
             {
                 case MasterProjectDocument masterProjectDocument:
-                {
-                    Log.Information("Successfully loaded project {ProjectFilePath}.", projectDocument.ProjectFile.FullName);
+                    {
+                        Log.Information("Successfully loaded project {ProjectFilePath}.", projectDocument.ProjectFile.FullName);
 
-                    break;
-                }
+                        break;
+                    }
                 case SubProjectDocument subProjectDocument:
-                {
-                    Log.Information("Successfully loaded project {ProjectFilePath} as a sub-project of {MasterProjectFileName}.",
-                        projectDocument.ProjectFile.FullName,
-                        subProjectDocument.MasterProjectDocument.ProjectFile.Name
-                    );
+                    {
+                        Log.Information("Successfully loaded project {ProjectFilePath} as a sub-project of {MasterProjectFileName}.",
+                            projectDocument.ProjectFile.FullName,
+                            subProjectDocument.MasterProjectDocument.ProjectFile.Name
+                        );
 
-                    break;
-                }
-            }
-            
-            Log.Debug("===========================");
-            foreach (PackageSource packageSource in projectDocument.ConfiguredPackageSources)
-            {
-                Log.Debug(" - Project uses package source {PackageSourceName} ({PackageSourceUrl})",
-                    packageSource.Name,
-                    packageSource.Source
-                );
+                        break;
+                    }
             }
 
-            Log.Debug("===========================");
-            if (projectDocument.HasMSBuildProject)
+            if (Workspace.Configuration.LogLevelSwitch.MinimumLevel <= LogEventLevel.Debug)
             {
-                if (Workspace.Configuration.CompletionsFromProject.Contains(CompletionSource.Task))
+                Log.Debug("===========================");
+                foreach (PackageSource packageSource in projectDocument.ConfiguredPackageSources)
                 {
-                    Log.Debug("Scanning task definitions for project {ProjectName}...", projectDocument.ProjectFile.Name);
-                    List<MSBuildTaskAssemblyMetadata> taskAssemblies = await projectDocument.GetMSBuildProjectTaskAssemblies();
-                    Log.Debug("Scan complete for task definitions of project {ProjectName} ({AssemblyCount} assemblies scanned).", projectDocument.ProjectFile.Name, taskAssemblies.Count);
-
-                    Log.Debug("===========================");
-                }
-
-                MSBuildObject[] msbuildObjects = projectDocument.MSBuildObjects.ToArray();
-                Log.Debug("MSBuild project loaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
-
-                foreach (MSBuildObject msbuildObject in msbuildObjects)
-                {
-                    Log.Debug("{Type:l}: {Kind} {Name} spanning {XmlRange}",
-                        msbuildObject.GetType().Name,
-                        msbuildObject.Kind,
-                        msbuildObject.Name,
-                        msbuildObject.XmlRange
+                    Log.Debug(" - Project uses package source {PackageSourceName} ({PackageSourceUrl})",
+                        packageSource.Name,
+                        packageSource.Source
                     );
                 }
+
+                Log.Debug("===========================");
+                if (projectDocument.HasMSBuildProject)
+                {
+                    if (Workspace.Configuration.CompletionsFromProject.Contains(CompletionSource.Task))
+                    {
+                        Log.Debug("Scanning task definitions for project {ProjectName}...", projectDocument.ProjectFile.Name);
+                        List<MSBuildTaskAssemblyMetadata> taskAssemblies = await projectDocument.GetMSBuildProjectTaskAssemblies();
+                        Log.Debug("Scan complete for task definitions of project {ProjectName} ({AssemblyCount} assemblies scanned).", projectDocument.ProjectFile.Name, taskAssemblies.Count);
+
+                        Log.Debug("===========================");
+                    }
+
+                    MSBuildObject[] msbuildObjects = projectDocument.MSBuildObjects.ToArray();
+                    Log.Debug("MSBuild project loaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
+
+                    foreach (MSBuildObject msbuildObject in msbuildObjects)
+                    {
+                        Log.Debug("{Type:l}: {Kind} {Name} spanning {XmlRange}",
+                            msbuildObject.GetType().Name,
+                            msbuildObject.Kind,
+                            msbuildObject.Name,
+                            msbuildObject.XmlRange
+                        );
+                    }
+                }
+                else
+                    Log.Debug("MSBuild project not loaded.");
             }
-            else
-                Log.Debug("MSBuild project not loaded.");
         }
 
         /// <summary>
@@ -247,28 +251,31 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
             ProjectDocument projectDocument = await Workspace.TryUpdateProjectDocument(parameters.TextDocument.Uri, updatedDocumentText);
             Workspace.PublishDiagnostics(projectDocument);
 
-            if (projectDocument.HasMSBuildProject)
+            if (Workspace.Configuration.LogLevelSwitch.MinimumLevel <= LogEventLevel.Debug)
             {
-                if (!projectDocument.IsMSBuildProjectCached)
+                if (projectDocument.HasMSBuildProject)
                 {
-                    MSBuildObject[] msbuildObjects = projectDocument.MSBuildObjects.ToArray();
-                    Log.Debug("MSBuild project reloaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
-
-                    foreach (MSBuildObject msbuildObject in msbuildObjects)
+                    if (!projectDocument.IsMSBuildProjectCached)
                     {
-                        Log.Debug("{Type:l}: {Kind} {Name} spanning {XmlRange}",
-                            msbuildObject.GetType().Name,
-                            msbuildObject.Kind,
-                            msbuildObject.Name,
-                            msbuildObject.XmlRange
-                        );
+                        MSBuildObject[] msbuildObjects = projectDocument.MSBuildObjects.ToArray();
+                        Log.Debug("MSBuild project reloaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
+
+                        foreach (MSBuildObject msbuildObject in msbuildObjects)
+                        {
+                            Log.Debug("{Type:l}: {Kind} {Name} spanning {XmlRange}",
+                                msbuildObject.GetType().Name,
+                                msbuildObject.Kind,
+                                msbuildObject.Name,
+                                msbuildObject.XmlRange
+                            );
+                        }
                     }
+                    else
+                        Log.Debug("MSBuild project not loaded; will used cached project state (as long as positional lookups are not required).");
                 }
                 else
-                    Log.Debug("MSBuild project not loaded; will used cached project state (as long as positional lookups are not required).");
+                    Log.Debug("MSBuild project not loaded.");
             }
-            else
-                Log.Debug("MSBuild project not loaded.");
         }
 
         /// <summary>
@@ -344,16 +351,16 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
             {
                 case "props":
                 case "targets":
-                {
-                    break;
-                }
-                default:
-                {
-                    if (extension.EndsWith("proj"))
+                    {
                         break;
+                    }
+                default:
+                    {
+                        if (extension.EndsWith("proj"))
+                            break;
 
-                    return new TextDocumentAttributes(documentUri, "plaintext");
-                }
+                        return new TextDocumentAttributes(documentUri, "plaintext");
+                    }
             }
 
             return new TextDocumentAttributes(documentUri, "msbuild");
@@ -372,7 +379,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
         {
             if (parameters == null)
                 throw new ArgumentNullException(nameof(parameters));
-            
+
             using (BeginOperation("OnDidOpenTextDocument"))
             {
                 try

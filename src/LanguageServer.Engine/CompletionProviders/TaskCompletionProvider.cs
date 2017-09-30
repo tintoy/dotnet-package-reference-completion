@@ -1,6 +1,7 @@
 using OmniSharp.Extensions.LanguageServer.Models;
 using Microsoft.Build.Construction;
 using Serilog;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,11 +46,18 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
         {
             if (projectDocument == null)
                 throw new ArgumentNullException(nameof(projectDocument));
-            
+
             // We trust that all tasks discovered via GetMSBuildProjectTaskAssemblies are accessible in the current project.
 
+            List<MSBuildTaskAssemblyMetadata> taskAssemblies;
+            using (Log.BeginTimedOperation("Get metadata for MSBuild project tasks", level: LogEventLevel.Verbose))
+            using (await projectDocument.ReaderLockAsync())
+            {
+                taskAssemblies = await projectDocument.GetMSBuildProjectTaskAssemblies();
+            }
+
             Dictionary<string, MSBuildTaskMetadata> tasks = new Dictionary<string, MSBuildTaskMetadata>();
-            foreach (MSBuildTaskAssemblyMetadata assemblyMetadata in await projectDocument.GetMSBuildProjectTaskAssemblies())
+            foreach (MSBuildTaskAssemblyMetadata assemblyMetadata in taskAssemblies)
             {
                 foreach (MSBuildTaskMetadata task in assemblyMetadata.Tasks)
                     tasks[task.Name] = task;

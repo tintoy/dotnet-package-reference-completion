@@ -228,7 +228,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         {
             SuggestPackageIds("Newtonsoft.Json").ContinueWith(task =>
             {
-                Log.Error(task.Exception.Flatten().InnerExceptions[0],
+                Log.Debug(task.Exception.Flatten().InnerExceptions[0],
                      "Error initialising NuGet client."
                 );
             }, TaskContinuationOptions.OnlyOnFaulted);

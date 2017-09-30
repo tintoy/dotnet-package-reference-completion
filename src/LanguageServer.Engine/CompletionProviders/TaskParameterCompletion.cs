@@ -68,77 +68,77 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 return null;
             }
 
-            if (!projectDocument.HasMSBuildProject)
+            using (await projectDocument.ReaderLockAsync())
             {
-                Log.Debug("Not offering task attribute completions for {XmlLocation:l} (underlying MSBuild project is not loaded).", location);
+                if (!projectDocument.HasMSBuildProject)
+                {
+                    Log.Debug("Not offering task attribute completions for {XmlLocation:l} (underlying MSBuild project is not loaded).", location);
 
-                return null;
+                    return null;
+                }
             }
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
             Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            XSElement taskElement;
+            XSAttribute replaceAttribute;
+            PaddingType needsPadding;
+            if (!location.CanCompleteAttribute(out taskElement, out replaceAttribute, out needsPadding))
             {
-                XSElement taskElement;
-                XSAttribute replaceAttribute;
-                PaddingType needsPadding;
-                if (!location.CanCompleteAttribute(out taskElement, out replaceAttribute, out needsPadding))
-                {
-                    Log.Debug("Not offering any completions for {XmlLocation:l} (not a location an attribute can be created or replaced by completion).", location);
+                Log.Debug("Not offering any completions for {XmlLocation:l} (not a location an attribute can be created or replaced by completion).", location);
 
-                    return null;
-                }
+                return null;
+            }
 
-                if (String.IsNullOrWhiteSpace(taskElement.Name))
-                {
-                    Log.Debug("Not offering any completions for {XmlLocation:l} (location represents an empty element).", location);
+            if (String.IsNullOrWhiteSpace(taskElement.Name))
+            {
+                Log.Debug("Not offering any completions for {XmlLocation:l} (location represents an empty element).", location);
 
-                    return null;
-                }
+                return null;
+            }
 
-                if (taskElement.ParentElement?.Name != "Target")
-                {
-                    Log.Debug("Not offering any completions for {XmlLocation:l} (attribute is not on an element that's a direct child of a 'Target' element).", location);
+            if (taskElement.ParentElement?.Name != "Target")
+            {
+                Log.Debug("Not offering any completions for {XmlLocation:l} (attribute is not on an element that's a direct child of a 'Target' element).", location);
 
-                    return null;
-                }
+                return null;
+            }
 
-                Dictionary<string, MSBuildTaskMetadata> projectTasks = await GetProjectTasks(projectDocument);
-                MSBuildTaskMetadata taskMetadata;
-                if (!projectTasks.TryGetValue(taskElement.Name, out taskMetadata))
-                {
-                    Log.Debug("Not offering any completions for {XmlLocation:l} (no metadata available for task {TaskName}).", location, taskElement.Name);
+            Dictionary<string, MSBuildTaskMetadata> projectTasks = await GetProjectTasks(projectDocument);
+            MSBuildTaskMetadata taskMetadata;
+            if (!projectTasks.TryGetValue(taskElement.Name, out taskMetadata))
+            {
+                Log.Debug("Not offering any completions for {XmlLocation:l} (no metadata available for task {TaskName}).", location, taskElement.Name);
 
-                    return null;
-                }
+                return null;
+            }
 
-                Range replaceRange = replaceAttribute?.Range ?? location.Position.ToEmptyRange();
-                if (replaceAttribute != null)
-                {
-                    Log.Debug("Offering completions to replace attribute {AttributeName} @ {ReplaceRange:l}",
-                        replaceAttribute.Name,
-                        replaceRange
-                    );
-                }
-                else
-                {
-                    Log.Debug("Offering completions to create attribute @ {ReplaceRange:l}",
-                        replaceRange
-                    );
-                }
-
-                HashSet<string> existingAttributeNames = new HashSet<string>(
-                    taskElement.AttributeNames
-                );
-                if (replaceAttribute != null)
-                    existingAttributeNames.Remove(replaceAttribute.Name);
-
-                completions.AddRange(
-                    GetCompletionItems(projectDocument, taskMetadata, existingAttributeNames, replaceRange, needsPadding)
+            Range replaceRange = replaceAttribute?.Range ?? location.Position.ToEmptyRange();
+            if (replaceAttribute != null)
+            {
+                Log.Debug("Offering completions to replace attribute {AttributeName} @ {ReplaceRange:l}",
+                    replaceAttribute.Name,
+                    replaceRange
                 );
             }
+            else
+            {
+                Log.Debug("Offering completions to create attribute @ {ReplaceRange:l}",
+                    replaceRange
+                );
+            }
+
+            HashSet<string> existingAttributeNames = new HashSet<string>(
+                taskElement.AttributeNames
+            );
+            if (replaceAttribute != null)
+                existingAttributeNames.Remove(replaceAttribute.Name);
+
+            completions.AddRange(
+                GetCompletionItems(projectDocument, taskMetadata, existingAttributeNames, replaceRange, needsPadding)
+            );
 
             Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
 

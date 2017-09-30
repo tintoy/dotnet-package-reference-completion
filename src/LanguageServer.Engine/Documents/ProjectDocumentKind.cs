@@ -21,8 +21,13 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         Targets = 3,
 
         /// <summary>
+        ///     A tasks file (*.tasks).
+        /// </summary>
+        Tasks = 4,
+
+        /// <summary>
         ///     Some other file type (*.*).
         /// </summary>
-        Other  = 4
+        Other  = 5
     }
 }

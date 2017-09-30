@@ -120,7 +120,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
         {
             ProjectDocument projectDocument = await Workspace.GetProjectDocument(parameters.TextDocument.Uri);
 
-            using (await projectDocument.Lock.ReaderLockAsync(cancellationToken))
+            using (await projectDocument.ReaderLockAsync(cancellationToken))
             {
                 if (!projectDocument.HasMSBuildProject || projectDocument.IsMSBuildProjectCached)
                     return null;

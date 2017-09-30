@@ -7,6 +7,7 @@ using NuGet.Configuration;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Serilog;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,29 +46,6 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         readonly List<AutoCompleteResource> _autoCompleteResources = new List<AutoCompleteResource>();
 
         /// <summary>
-        ///     The underlying MSBuild project collection.
-        /// </summary>
-        public ProjectCollection MSBuildProjectCollection { get; protected set; }
-
-        /// <summary>
-        ///     The underlying MSBuild project.
-        /// </summary>
-        public Project MSBuildProject { get; protected set; }
-
-        /// <summary>
-        ///     Is the underlying MSBuild project cached (i.e. out-of-date with respect to the source text)?
-        /// </summary>
-        /// <remarks>
-        ///     If the current project XML is invalid, the original MSBuild project is retained, but <see cref="MSBuildLocator"/> functionality will be unavailable (since source positions may no longer match up).
-        /// </remarks>
-        public bool IsMSBuildProjectCached { get; private set; }
-
-        /// <summary>
-        ///     Is parsing of MSBuild expressions enabled?
-        /// </summary>
-        public bool EnableExpressions { get; set; }
-
-        /// <summary>
         ///     Create a new <see cref="ProjectDocument"/>.
         /// </summary>
         /// <param name="workspace">
@@ -99,6 +77,8 @@ namespace MSBuildProjectTools.LanguageServer.Documents
                 Kind = ProjectDocumentKind.Properties;
             else if (ProjectFile.Extension.Equals(".targets", StringComparison.OrdinalIgnoreCase))
                 Kind = ProjectDocumentKind.Targets;
+            else if (ProjectFile.Extension.Equals(".tasks", StringComparison.OrdinalIgnoreCase))
+                Kind = ProjectDocumentKind.Tasks;
             else
                 Kind = ProjectDocumentKind.Other;
 
@@ -153,11 +133,6 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         public ProjectDocumentKind Kind { get; }
 
         /// <summary>
-        ///     A lock used to control access to project state.
-        /// </summary>
-        public AsyncReaderWriterLock Lock { get; } = new AsyncReaderWriterLock();
-
-        /// <summary>
         ///     Are there currently any diagnostics to be published for the project?
         /// </summary>
         public bool HasDiagnostics => _diagnostics.Count > 0;
@@ -198,6 +173,29 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         public XmlLocator XmlLocator { get; protected set; }
 
         /// <summary>
+        ///     The underlying MSBuild project collection.
+        /// </summary>
+        public ProjectCollection MSBuildProjectCollection { get; protected set; }
+
+        /// <summary>
+        ///     The underlying MSBuild project.
+        /// </summary>
+        public Project MSBuildProject { get; protected set; }
+
+        /// <summary>
+        ///     Is the underlying MSBuild project cached (i.e. out-of-date with respect to the source text)?
+        /// </summary>
+        /// <remarks>
+        ///     If the current project XML is invalid, the original MSBuild project is retained, but <see cref="MSBuildLocator"/> functionality will be unavailable (since source positions may no longer match up).
+        /// </remarks>
+        public bool IsMSBuildProjectCached { get; private set; }
+
+        /// <summary>
+        ///     Is parsing of MSBuild expressions enabled?
+        /// </summary>
+        public bool EnableExpressions { get; set; }
+
+        /// <summary>
         ///     The project MSBuild object-lookup facility.
         /// </summary>
         protected MSBuildLocator MSBuildLocator { get; private set; }
@@ -231,6 +229,87 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         ///     The document's logger.
         /// </summary>
         protected ILogger Log { get; set; }
+
+        /// <summary>
+        ///     A lock used to control access to project state.
+        /// </summary>
+        AsyncReaderWriterLock Lock { get; } = new AsyncReaderWriterLock();
+
+        /// <summary>
+        ///     Synchronously acquire a reader lock for project state.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="IDisposable"/> representing the lock.
+        /// </returns>
+        public IDisposable ReaderLock() => Lock.ReaderLock();
+
+        /// <summary>
+        ///     Synchronously acquire a reader lock for project state.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> that can be used to cancel lock acquisition.
+        /// </param>
+        /// <returns>
+        ///     An <see cref="IDisposable"/> representing the lock.
+        /// </returns>
+        public IDisposable ReaderLock(CancellationToken cancellationToken) => Lock.ReaderLock(cancellationToken);
+
+        /// <summary>
+        ///     Aynchronously acquire a reader lock for project state.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AwaitableDisposable{T}"/> representing the lock.
+        /// </returns>
+        public AwaitableDisposable<IDisposable> ReaderLockAsync() => Lock.ReaderLockAsync();
+
+        /// <summary>
+        ///     Aynchronously acquire a reader lock for project state.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> that can be used to cancel lock acquisition.
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AwaitableDisposable{T}"/> representing the lock.
+        /// </returns>
+        public AwaitableDisposable<IDisposable> ReaderLockAsync(CancellationToken cancellationToken) => Lock.ReaderLockAsync(cancellationToken);
+        
+        /// <summary>
+        ///     Synchronously acquire a writer lock for project state.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="IDisposable"/> representing the lock.
+        /// </returns>
+        public IDisposable WriterLock() => Lock.WriterLock();
+
+        /// <summary>
+        ///     Synchronously acquire a reader lock for project state.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> that can be used to cancel lock acquisition.
+        /// </param>
+        /// <returns>
+        ///     An <see cref="IDisposable"/> representing the lock.
+        /// </returns>
+        public IDisposable WriterLock(CancellationToken cancellationToken) => Lock.WriterLock(cancellationToken);
+
+        /// <summary>
+        ///     Aynchronously acquire a writer lock for project state.
+        /// </summary>
+        /// <returns>
+        ///     An <see cref="AwaitableDisposable{T}"/> representing the lock.
+        /// </returns>
+        public AwaitableDisposable<IDisposable> WriterLockAsync() => Lock.WriterLockAsync();
+
+        /// <summary>
+        ///     Aynchronously acquire a writer lock for project state.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> that can be used to cancel lock acquisition.
+        /// </param>
+        /// <returns>
+        ///     An <see cref="AwaitableDisposable{T}"/> representing the lock.
+        /// </returns>
+        public AwaitableDisposable<IDisposable> WriterLockAsync(CancellationToken cancellationToken) =>Lock.WriterLockAsync(cancellationToken);
 
         /// <summary>
         ///     Inspect the specified location in the XML.
@@ -543,6 +622,8 @@ namespace MSBuildProjectTools.LanguageServer.Documents
             if (!HasMSBuildProject)
                 throw new InvalidOperationException($"MSBuild project '{ProjectFile.FullName}' is not loaded.");
 
+            // TODO: Cache this metadata until the project is re-evaluated.
+
             List<string> taskAssemblyFiles = new List<string>
             {
                 // Include "built-in" tasks.
@@ -550,35 +631,41 @@ namespace MSBuildProjectTools.LanguageServer.Documents
                 Path.Combine(DotNetRuntimeInfo.GetCurrent().BaseDirectory, "Roslyn", "Microsoft.Build.Tasks.CodeAnalysis.dll")
             };
 
-            taskAssemblyFiles.AddRange(
-                MSBuildProject.GetAllUsingTasks()
-                    .Where(usingTask => !String.IsNullOrWhiteSpace(usingTask.AssemblyFile))
-                    .Select(usingTask => Path.GetFullPath(
-                        Path.Combine(
-                            usingTask.ContainingProject.DirectoryPath,
-                            MSBuildProject.ExpandString(usingTask.AssemblyFile)
-                                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
-                        )
-                    ))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-            );
+            using (Log.BeginTimedOperation("Compute paths for MSBuild task assemblies", level: LogEventLevel.Verbose))
+            {
+                taskAssemblyFiles.AddRange(
+                    MSBuildProject.GetAllUsingTasks()
+                        .Where(usingTask => !String.IsNullOrWhiteSpace(usingTask.AssemblyFile))
+                        .Select(usingTask => Path.GetFullPath(
+                            Path.Combine(
+                                usingTask.ContainingProject.DirectoryPath,
+                                MSBuildProject.ExpandString(usingTask.AssemblyFile)
+                                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
+                            )
+                        ))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                );
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             List<MSBuildTaskAssemblyMetadata> metadata = new List<MSBuildTaskAssemblyMetadata>();
-            foreach (string taskAssemblyFile in taskAssemblyFiles)
+            using (Log.BeginTimedOperation("Get metadata for MSBuild task assemblies", level: LogEventLevel.Verbose))
             {
-                if (!File.Exists(taskAssemblyFile))
+                foreach (string taskAssemblyFile in taskAssemblyFiles)
                 {
-                    Log.Information("Skipped scan of task metadata for assembly {TaskAssemblyFile} (file not found).", taskAssemblyFile);
+                    if (!File.Exists(taskAssemblyFile))
+                    {
+                        Log.Information("Skipped scan of task metadata for assembly {TaskAssemblyFile} (file not found).", taskAssemblyFile);
 
-                    continue;
+                        continue;
+                    }
+
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    MSBuildTaskAssemblyMetadata assemblyMetadata = await Workspace.TaskMetadataCache.GetAssemblyMetadata(taskAssemblyFile);
+                    metadata.Add(assemblyMetadata);
                 }
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                MSBuildTaskAssemblyMetadata assemblyMetadata = await Workspace.TaskMetadataCache.GetAssemblyMetadata(taskAssemblyFile);
-                metadata.Add(assemblyMetadata);
             }
 
             // Persist any changes to cached metadata.

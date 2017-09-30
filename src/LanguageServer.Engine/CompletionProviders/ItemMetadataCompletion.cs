@@ -62,7 +62,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            using (await projectDocument.ReaderLockAsync())
             {
                 HashSet<string> existingMetadata = new HashSet<string>();
                 

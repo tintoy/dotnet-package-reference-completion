@@ -116,7 +116,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
             ProjectDocument projectDocument = await Workspace.GetProjectDocument(parameters.TextDocument.Uri);
 
             List<SymbolInformation> symbols = new List<SymbolInformation>();
-            using (await projectDocument.Lock.ReaderLockAsync(cancellationToken))
+            using (await projectDocument.ReaderLockAsync(cancellationToken))
             {
                 // We need a valid MSBuild project with up-to-date positional information.
                 if (!projectDocument.HasMSBuildProject || projectDocument.IsMSBuildProjectCached)

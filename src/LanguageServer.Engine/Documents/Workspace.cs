@@ -62,6 +62,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
             Configuration = configuration;
             DiagnosticsPublisher = diagnosticsPublisher;
             Log = logger.ForContext<Workspace>();
+            TaskMetadataCache = new MSBuildTaskMetadataCache(logger);
 
             string extensionDirectory = Environment.GetEnvironmentVariable("MSBUILD_PROJECT_TOOLS_DIR");
             if (String.IsNullOrWhiteSpace(extensionDirectory))
@@ -142,7 +143,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         /// <summary>
         ///     The cache for MSBuild task metadata.
         /// </summary>
-        public MSBuildTaskMetadataCache TaskMetadataCache { get; } = new MSBuildTaskMetadataCache();
+        public MSBuildTaskMetadataCache TaskMetadataCache { get; }
 
         /// <summary>
         ///     The master project (if any).
@@ -201,7 +202,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
             {
                 if (isNewProject || reload)
                 {
-                    using (await projectDocument.Lock.WriterLockAsync())
+                    using (await projectDocument.WriterLockAsync())
                     {
                         await projectDocument.Load();
                     }
@@ -246,7 +247,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
 
             try
             {
-                using (await projectDocument.Lock.WriterLockAsync())
+                using (await projectDocument.WriterLockAsync())
                 {
                     projectDocument.Update(documentText);
                 }
@@ -317,7 +318,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
             if (MasterProject == projectDocument)
                 MasterProject = null;                
 
-            using (await projectDocument.Lock.WriterLockAsync())
+            using (await projectDocument.WriterLockAsync())
             {
                 ClearDiagnostics(projectDocument);
 
@@ -359,12 +360,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
         /// </summary>
         public void PersistTaskMetadataCache()
         {
-            if (!TaskMetadataCacheFile.Directory.Exists)
-                ExtensionDataDirectory.Create();
-
             TaskMetadataCache.Save(TaskMetadataCacheFile.FullName);
-
-            Log.Debug("Persisted task metadata cache to {CacheFile}.", TaskMetadataCacheFile.FullName);
         }
     }
 }

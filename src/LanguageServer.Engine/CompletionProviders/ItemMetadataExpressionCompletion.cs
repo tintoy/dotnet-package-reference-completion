@@ -65,7 +65,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            using (await projectDocument.ReaderLockAsync())
             {
                 if (!projectDocument.EnableExpressions)
                     return null;

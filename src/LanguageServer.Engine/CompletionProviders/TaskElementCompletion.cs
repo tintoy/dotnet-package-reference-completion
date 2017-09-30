@@ -81,35 +81,31 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            XSElement replaceElement;
+            if (!location.CanCompleteElement(out replaceElement, asChildOfElementNamed: "Target"))
             {
-                XSElement replaceElement;
-                if (!location.CanCompleteElement(out replaceElement, asChildOfElementNamed: "Target"))
-                {
-                    Log.Debug("Not offering any completions for {XmlLocation:l} (does not represent the direct child of a 'Target' element).", location);
+                Log.Debug("Not offering any completions for {XmlLocation:l} (does not represent the direct child of a 'Target' element).", location);
 
-                    return null;
-                }
-                
-                if (replaceElement != null)
-                {
-                    Log.Debug("Offering completions to replace element {ElementName} @ {ReplaceRange:l}",
-                        replaceElement.Name,
-                        replaceElement.Range
-                    );
+                return null;
+            }
 
-                    Dictionary<string, MSBuildTaskMetadata> projectTasks = await GetProjectTasks(projectDocument);
+            if (replaceElement != null)
+            {
+                Log.Debug("Offering completions to replace element {ElementName} @ {ReplaceRange:l}",
+                    replaceElement.Name,
+                    replaceElement.Range
+                );
 
-                    completions.AddRange(
-                        GetCompletionItems(projectDocument, projectTasks, replaceElement.Range)
-                    );
-                }
-                else
-                {
-                    Log.Debug("Not offering any completions for {XmlLocation:l} (no element to replace at this position).", location);
+                Dictionary<string, MSBuildTaskMetadata> projectTasks = await GetProjectTasks(projectDocument);
+                completions.AddRange(
+                    GetCompletionItems(projectTasks, replaceElement.Range)
+                );
+            }
+            else
+            {
+                Log.Debug("Not offering any completions for {XmlLocation:l} (no element to replace at this position).", location);
 
-                    return null;
-                }
+                return null;
             }
 
             Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
@@ -125,9 +121,6 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
         /// <summary>
         ///     Get task element completions.
         /// </summary>
-        /// <param name="projectDocument">
-        ///     The <see cref="ProjectDocument"/> for which completions will be offered.
-        /// </param>
         /// <param name="projectTasks">
         ///     The metadata for the tasks defined in the project (and its imports), keyed by task name.
         /// </param>
@@ -137,7 +130,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
         /// <returns>
         ///     A sequence of <see cref="CompletionItem"/>s.
         /// </returns>
-        public IEnumerable<CompletionItem> GetCompletionItems(ProjectDocument projectDocument, Dictionary<string, MSBuildTaskMetadata> projectTasks, Range replaceRange)
+        public IEnumerable<CompletionItem> GetCompletionItems(Dictionary<string, MSBuildTaskMetadata> projectTasks, Range replaceRange)
         {
             if (replaceRange == null)
                 throw new ArgumentNullException(nameof(replaceRange));

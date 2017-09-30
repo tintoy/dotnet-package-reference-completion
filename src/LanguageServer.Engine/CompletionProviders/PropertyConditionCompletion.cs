@@ -62,7 +62,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            using (await projectDocument.ReaderLockAsync())
             {
                 XSAttribute conditionAttribute;
                 if (!location.IsAttributeValue(out conditionAttribute) || conditionAttribute.Name != "Condition")

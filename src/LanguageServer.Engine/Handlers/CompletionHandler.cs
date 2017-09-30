@@ -155,7 +155,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
 
             bool isIncomplete = false;
             List<CompletionItem> completionItems = new List<CompletionItem>();
-            using (await projectDocument.Lock.ReaderLockAsync(cancellationToken))
+            using (await projectDocument.ReaderLockAsync(cancellationToken))
             {
                 if (!projectDocument.HasXml)
                     return NoCompletions;

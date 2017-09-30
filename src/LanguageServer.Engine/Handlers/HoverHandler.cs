@@ -116,7 +116,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
 
             ProjectDocument projectDocument = await Workspace.GetProjectDocument(parameters.TextDocument.Uri);
 
-            using (await projectDocument.Lock.ReaderLockAsync(cancellationToken))
+            using (await projectDocument.ReaderLockAsync(cancellationToken))
             {
                 // This won't work if we can't inspect the MSBuild project state and match it up to the target position.
                 if (!projectDocument.HasMSBuildProject || projectDocument.IsMSBuildProjectCached)

@@ -67,7 +67,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            using (await projectDocument.ReaderLockAsync())
             {
                 XSAttribute attribute;
                 if (!location.CanCompleteAttributeValue(out attribute, onElementNamed: "Target") || !SupportedAttributeNames.Contains(attribute.Name))

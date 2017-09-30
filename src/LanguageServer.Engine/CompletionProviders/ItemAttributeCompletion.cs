@@ -72,7 +72,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            using (await projectDocument.Lock.ReaderLockAsync())
+            using (await projectDocument.ReaderLockAsync())
             {
                 XSElement element;
                 XSAttribute replaceAttribute;
