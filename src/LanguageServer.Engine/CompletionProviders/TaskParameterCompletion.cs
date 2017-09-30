@@ -63,21 +63,21 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             if (!projectDocument.Workspace.Configuration.CompletionsFromProject.Contains(CompletionSource.Task))
             {
-                Log.Verbose("Not offering task attribute completions for {XmlLocation:l} (task completions not enabled in extension settings).", location);
+                Log.Debug("Not offering task attribute completions for {XmlLocation:l} (task completions not enabled in extension settings).", location);
 
                 return null;
             }
 
             if (!projectDocument.HasMSBuildProject)
             {
-                Log.Verbose("Not offering task attribute completions for {XmlLocation:l} (underlying MSBuild project is not loaded).", location);
+                Log.Debug("Not offering task attribute completions for {XmlLocation:l} (underlying MSBuild project is not loaded).", location);
 
                 return null;
             }
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             using (await projectDocument.Lock.ReaderLockAsync())
             {
@@ -86,14 +86,21 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 PaddingType needsPadding;
                 if (!location.CanCompleteAttribute(out taskElement, out replaceAttribute, out needsPadding))
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (not a location an attribute can be created or replaced by completion).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (not a location an attribute can be created or replaced by completion).", location);
+
+                    return null;
+                }
+
+                if (String.IsNullOrWhiteSpace(taskElement.Name))
+                {
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (location represents an empty element).", location);
 
                     return null;
                 }
 
                 if (taskElement.ParentElement?.Name != "Target")
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (attribute is not on an element that's a direct child of a 'Target' element).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (attribute is not on an element that's a direct child of a 'Target' element).", location);
 
                     return null;
                 }
@@ -102,7 +109,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 MSBuildTaskMetadata taskMetadata;
                 if (!projectTasks.TryGetValue(taskElement.Name, out taskMetadata))
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (no metadata available for task {TaskName}).", location, taskElement.Name);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (no metadata available for task {TaskName}).", location, taskElement.Name);
 
                     return null;
                 }
@@ -110,14 +117,14 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 Range replaceRange = replaceAttribute?.Range ?? location.Position.ToEmptyRange();
                 if (replaceAttribute != null)
                 {
-                    Log.Verbose("Offering completions to replace attribute {AttributeName} @ {ReplaceRange:l}",
+                    Log.Debug("Offering completions to replace attribute {AttributeName} @ {ReplaceRange:l}",
                         replaceAttribute.Name,
                         replaceRange
                     );
                 }
                 else
                 {
-                    Log.Verbose("Offering completions to create attribute @ {ReplaceRange:l}",
+                    Log.Debug("Offering completions to create attribute @ {ReplaceRange:l}",
                         replaceRange
                     );
                 }
@@ -133,7 +140,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 );
             }
 
-            Log.Verbose("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
+            Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
 
             if (completions.Count == 0)
                 return null;

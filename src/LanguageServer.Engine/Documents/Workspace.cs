@@ -342,6 +342,8 @@ namespace MSBuildProjectTools.LanguageServer.Documents
             {
                 TaskMetadataCache.Load(TaskMetadataCacheFile.FullName);
 
+                Log.Debug("Loaded task metadata cache from {CacheFile}.", TaskMetadataCacheFile.FullName);
+
                 return true;
             }
             catch (Exception cacheLoadError)
@@ -361,6 +363,8 @@ namespace MSBuildProjectTools.LanguageServer.Documents
                 ExtensionDataDirectory.Create();
 
             TaskMetadataCache.Save(TaskMetadataCacheFile.FullName);
+
+            Log.Debug("Persisted task metadata cache to {CacheFile}.", TaskMetadataCacheFile.FullName);
         }
     }
 }

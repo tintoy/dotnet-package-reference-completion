@@ -46,8 +46,6 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             if (projectDocument == null)
                 throw new ArgumentNullException(nameof(projectDocument));
             
-            MSBuildTaskMetadataCache taskMetadataCache = projectDocument.Workspace.TaskMetadataCache;
-
             // We trust that all tasks discovered via GetMSBuildProjectTaskAssemblies are accessible in the current project.
 
             Dictionary<string, MSBuildTaskMetadata> tasks = new Dictionary<string, MSBuildTaskMetadata>();

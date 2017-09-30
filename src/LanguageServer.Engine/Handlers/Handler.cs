@@ -14,6 +14,7 @@ using System.Reactive.Disposables;
 
 namespace MSBuildProjectTools.LanguageServer.Handlers
 {
+    using Serilog.Events;
     using Utilities;
 
     /// <summary>
@@ -65,8 +66,18 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                 throw new ArgumentException("Argument cannot be null, empty, or entirely composed of whitespace: 'operationName'.", nameof(operationName));
             
             return new CompositeDisposable(
+                // Activity Id
                 ActivityCorrelationManager.BeginActivityScope(),
-                Serilog.Context.LogContext.PushProperty("Operation", operationName)
+
+                // Operation
+                Serilog.Context.LogContext.PushProperty("Operation", operationName),
+
+                // Timing
+                Log.BeginTimedOperation(operationName,
+                    identifier: ActivityCorrelationManager.CurrentActivityId?.ToString(),
+                    level: LogEventLevel.Verbose,
+                    warnIfExceeds: TimeSpan.FromSeconds(10)
+                )
             );
         }
     }

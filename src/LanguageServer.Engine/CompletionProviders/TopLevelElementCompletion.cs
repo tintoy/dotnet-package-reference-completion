@@ -61,25 +61,25 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             using (await projectDocument.Lock.ReaderLockAsync())
             {
                 XSElement replaceElement;
                 if (!location.CanCompleteElement(out replaceElement, asChildOfElementNamed: "Project"))
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (not a direct child of the 'Project' element).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (not a direct child of the 'Project' element).", location);
 
                     return null;
                 }
                 if (replaceElement == null)
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (no element to replace at this position).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (no element to replace at this position).", location);
 
                     return null;
                 }
 
-                Log.Verbose("Offering completions to replace element {ElementName} @ {ReplaceRange:l}",
+                Log.Debug("Offering completions to replace element {ElementName} @ {ReplaceRange:l}",
                     replaceElement.Name,
                     replaceElement.Range
                 );
@@ -89,7 +89,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 );
             }
 
-            Log.Verbose("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
+            Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
 
             if (completions.Count == 0)
                 return null;

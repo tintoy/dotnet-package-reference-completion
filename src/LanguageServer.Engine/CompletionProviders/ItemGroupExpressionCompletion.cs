@@ -62,7 +62,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             using (await projectDocument.Lock.ReaderLockAsync())
             {
@@ -73,7 +73,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 Range expressionRange;
                 if (!location.IsExpression(out expression, out expressionRange))
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (not on an expression or a location where an expression can be added).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (not on an expression or a location where an expression can be added).", location);
 
                     return null;
                 }
@@ -82,12 +82,12 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                     expressionRange = location.Position.ToEmptyRange(); // We're between expressions, so just insert.
                 else if (expression.Kind != ExpressionKind.ItemGroup)
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (this provider only supports MSBuild ItemGroup expressions, not {ExpressionKind} expressions).", location, expression.Kind);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (this provider only supports MSBuild ItemGroup expressions, not {ExpressionKind} expressions).", location, expression.Kind);
 
                     return null;
                 }
                 
-                Log.Verbose("Offering completions to replace ItemGroup expression @ {ReplaceRange:l}",
+                Log.Debug("Offering completions to replace ItemGroup expression @ {ReplaceRange:l}",
                     expressionRange
                 );
 
@@ -96,7 +96,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 );
             }
 
-            Log.Verbose("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
+            Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
 
             if (completions.Count == 0)
                 return null;

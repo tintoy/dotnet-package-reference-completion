@@ -98,7 +98,7 @@ namespace MSBuildProjectTools.LanguageServer.Documents
 
                     MSBuildProject.ReevaluateIfNecessary();
 
-                    Log.Verbose("Successfully updated MSBuild project '{ProjectFileName}' from in-memory changes.");
+                    Log.Debug("Successfully updated MSBuild project '{ProjectFileName}' from in-memory changes.");
                 }
                 else
                     MSBuildProject = MSBuildProjectCollection.LoadProject(ProjectFile.FullName);

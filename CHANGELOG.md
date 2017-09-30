@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.2.9
+
+* Implement performance-oriented logging and use the results to improve performance of task element completions.
+* Switch Verbose and Debug logging levels (in my opinion, Serilog has these backwards).
+
 ## v0.2.8
 
 * _Experimental:_ Add completions for task elements based on task types declared in the project.

@@ -186,33 +186,33 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                 }
             }
             
-            Log.Verbose("===========================");
+            Log.Debug("===========================");
             foreach (PackageSource packageSource in projectDocument.ConfiguredPackageSources)
             {
-                Log.Verbose(" - Project uses package source {PackageSourceName} ({PackageSourceUrl})",
+                Log.Debug(" - Project uses package source {PackageSourceName} ({PackageSourceUrl})",
                     packageSource.Name,
                     packageSource.Source
                 );
             }
 
-            Log.Verbose("===========================");
+            Log.Debug("===========================");
             if (projectDocument.HasMSBuildProject)
             {
                 if (Workspace.Configuration.CompletionsFromProject.Contains(CompletionSource.Task))
                 {
-                    Log.Verbose("Scanning task definitions for project {ProjectName}...", projectDocument.ProjectFile.Name);
+                    Log.Debug("Scanning task definitions for project {ProjectName}...", projectDocument.ProjectFile.Name);
                     List<MSBuildTaskAssemblyMetadata> taskAssemblies = await projectDocument.GetMSBuildProjectTaskAssemblies();
-                    Log.Verbose("Scan complete for task definitions of project {ProjectName} ({AssemblyCount} assemblies scanned).", projectDocument.ProjectFile.Name, taskAssemblies.Count);
+                    Log.Debug("Scan complete for task definitions of project {ProjectName} ({AssemblyCount} assemblies scanned).", projectDocument.ProjectFile.Name, taskAssemblies.Count);
 
-                    Log.Verbose("===========================");
+                    Log.Debug("===========================");
                 }
 
                 MSBuildObject[] msbuildObjects = projectDocument.MSBuildObjects.ToArray();
-                Log.Verbose("MSBuild project loaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
+                Log.Debug("MSBuild project loaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
 
                 foreach (MSBuildObject msbuildObject in msbuildObjects)
                 {
-                    Log.Verbose("{Type:l}: {Kind} {Name} spanning {XmlRange}",
+                    Log.Debug("{Type:l}: {Kind} {Name} spanning {XmlRange}",
                         msbuildObject.GetType().Name,
                         msbuildObject.Kind,
                         msbuildObject.Name,
@@ -221,7 +221,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                 }
             }
             else
-                Log.Verbose("MSBuild project not loaded.");
+                Log.Debug("MSBuild project not loaded.");
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
         /// </returns>
         async Task OnDidChangeTextDocument(DidChangeTextDocumentParams parameters)
         {
-            Log.Verbose("Reloading project {ProjectFile}...",
+            Log.Debug("Reloading project {ProjectFile}...",
                 VSCodeDocumentUri.GetFileSystemPath(parameters.TextDocument.Uri)
             );
 
@@ -252,11 +252,11 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                 if (!projectDocument.IsMSBuildProjectCached)
                 {
                     MSBuildObject[] msbuildObjects = projectDocument.MSBuildObjects.ToArray();
-                    Log.Verbose("MSBuild project reloaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
+                    Log.Debug("MSBuild project reloaded ({MSBuildObjectCount} MSBuild objects).", msbuildObjects.Length);
 
                     foreach (MSBuildObject msbuildObject in msbuildObjects)
                     {
-                        Log.Verbose("{Type:l}: {Kind} {Name} spanning {XmlRange}",
+                        Log.Debug("{Type:l}: {Kind} {Name} spanning {XmlRange}",
                             msbuildObject.GetType().Name,
                             msbuildObject.Kind,
                             msbuildObject.Name,
@@ -265,10 +265,10 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                     }
                 }
                 else
-                    Log.Verbose("MSBuild project not loaded; will used cached project state (as long as positional lookups are not required).");
+                    Log.Debug("MSBuild project not loaded; will used cached project state (as long as positional lookups are not required).");
             }
             else
-                Log.Verbose("MSBuild project not loaded.");
+                Log.Debug("MSBuild project not loaded.");
         }
 
         /// <summary>

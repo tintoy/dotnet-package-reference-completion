@@ -65,35 +65,35 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             if (!projectDocument.Workspace.Configuration.CompletionsFromProject.Contains(CompletionSource.Task))
             {
-                Log.Verbose("Not offering task element completions for {XmlLocation:l} (task completions not enabled in extension settings).", location);
+                Log.Debug("Not offering task element completions for {XmlLocation:l} (task completions not enabled in extension settings).", location);
 
                 return null;
             }
 
             if (!projectDocument.HasMSBuildProject)
             {
-                Log.Verbose("Not offering task element completions for {XmlLocation:l} (underlying MSBuild project is not loaded).", location);
+                Log.Debug("Not offering task element completions for {XmlLocation:l} (underlying MSBuild project is not loaded).", location);
 
                 return null;
             }
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             using (await projectDocument.Lock.ReaderLockAsync())
             {
                 XSElement replaceElement;
                 if (!location.CanCompleteElement(out replaceElement, asChildOfElementNamed: "Target"))
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (does not represent the direct child of a 'Target' element).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (does not represent the direct child of a 'Target' element).", location);
 
                     return null;
                 }
                 
                 if (replaceElement != null)
                 {
-                    Log.Verbose("Offering completions to replace element {ElementName} @ {ReplaceRange:l}",
+                    Log.Debug("Offering completions to replace element {ElementName} @ {ReplaceRange:l}",
                         replaceElement.Name,
                         replaceElement.Range
                     );
@@ -106,13 +106,13 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 }
                 else
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (no element to replace at this position).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (no element to replace at this position).", location);
 
                     return null;
                 }
             }
 
-            Log.Verbose("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
+            Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
 
             if (completions.Count == 0)
                 return null;

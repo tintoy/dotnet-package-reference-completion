@@ -58,7 +58,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             if (projectDocument == null)
                 throw new ArgumentNullException(nameof(projectDocument));
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
@@ -78,7 +78,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             if (completions.Count == 0)
                 return null; // No completions offered
 
-            Log.Verbose("Offering {CompletionCount} completions for {XmlLocation:l}.", location);
+            Log.Debug("Offering {CompletionCount} completions for {XmlLocation:l}.", location);
 
             return new CompletionList(completions,
                 isIncomplete: false // List is exhaustive
@@ -102,14 +102,14 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
         /// </returns>
         IEnumerable<CompletionItem> GetAttributeCompletions(XmlLocation location, ProjectDocument projectDocument, HashSet<string> existingMetadata)
         {
-            Log.Verbose("Evaluate attribute completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate attribute completions for {XmlLocation:l}", location);
 
             XSElement itemElement;
             XSAttribute replaceAttribute;
             PaddingType needsPadding;
             if (!location.CanCompleteAttribute(out itemElement, out replaceAttribute, out needsPadding))
             {
-                Log.Verbose("Not offering any attribute completions for {XmlLocation:l} (not a location where we can offer attribute completion.", location);
+                Log.Debug("Not offering any attribute completions for {XmlLocation:l} (not a location where we can offer attribute completion.", location);
 
                 yield break;
             }
@@ -118,7 +118,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             // TODO: Make an XmlLocation.IsItemElement extension method for this.
             if (itemElement.ParentElement?.Name != "ItemGroup")
             {
-                Log.Verbose("Not offering any attribute completions for {XmlLocation:l} (element is not a direct child of a 'PropertyGroup' element).", location);
+                Log.Debug("Not offering any attribute completions for {XmlLocation:l} (element is not a direct child of a 'PropertyGroup' element).", location);
 
                 yield break;
             }
@@ -126,7 +126,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             string itemType = itemElement.Name;
             if (String.IsNullOrWhiteSpace(itemType))
             {
-                Log.Verbose("Not offering any attribute completions for {XmlLocation:l} (element represents a new, unnamed, item group).",
+                Log.Debug("Not offering any attribute completions for {XmlLocation:l} (element represents a new, unnamed, item group).",
                     location,
                     itemType
                 );
@@ -136,7 +136,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
 
             if (MSBuildSchemaHelp.ForItemType(itemType) == null)
             {
-                Log.Verbose("Not offering any attribute completions for {XmlLocation:l} ({ItemType} is not a well-known item type).",
+                Log.Debug("Not offering any attribute completions for {XmlLocation:l} ({ItemType} is not a well-known item type).",
                     location,
                     itemType
                 );
@@ -144,7 +144,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 yield break;
             }
 
-            Log.Verbose("Will offer attribute completions for {XmlLocation:l} (padding: {NeedsPadding})", location, needsPadding);
+            Log.Debug("Will offer attribute completions for {XmlLocation:l} (padding: {NeedsPadding})", location, needsPadding);
 
             // Don't offer completions for existing metadata.
             existingMetadata.UnionWith(
@@ -204,25 +204,25 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
         /// </returns>
         IEnumerable<CompletionItem> GetElementCompletions(XmlLocation location, ProjectDocument projectDocument, HashSet<string> existingMetadata)
         {
-            Log.Verbose("Evaluate element completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate element completions for {XmlLocation:l}", location);
 
             XSElement replaceElement;
             if (!location.CanCompleteElement(out replaceElement))
             {
-                Log.Verbose("Not offering any element completions for {XmlLocation:l} (not a location where an element can be created or replaced by completion).", location);
+                Log.Debug("Not offering any element completions for {XmlLocation:l} (not a location where an element can be created or replaced by completion).", location);
 
                 yield break;
             }
             if (replaceElement == null)
             {
-                Log.Verbose("Not offering any element completions for {XmlLocation:l} (no element to replace at this position).", location);
+                Log.Debug("Not offering any element completions for {XmlLocation:l} (no element to replace at this position).", location);
 
                 yield break;
             }
 
             if (replaceElement.ParentElement?.ParentElement?.Name != "ItemGroup")
             {
-                Log.Verbose("Not offering any element completions for {XmlLocation:l} (element's parent is not an item element).", location);
+                Log.Debug("Not offering any element completions for {XmlLocation:l} (element's parent is not an item element).", location);
 
                 yield break;
             }
@@ -230,7 +230,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             // These items are handled by PackageReferenceCompletion.
             if (replaceElement.ParentElement?.Name == "PackageReference" || replaceElement.ParentElement?.Name == "DotNetCliToolReference")
             {
-                Log.Verbose("Not offering any element completions for {XmlLocation:l} ({ItemType} items are handled by another provider).",
+                Log.Debug("Not offering any element completions for {XmlLocation:l} ({ItemType} items are handled by another provider).",
                     location,
                     replaceElement.Name
                 );
@@ -241,7 +241,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             string itemType = replaceElement.ParentElement.Name;
             if (MSBuildSchemaHelp.ForItemType(itemType) == null)
             {
-                Log.Verbose("Not offering any element completions for {XmlLocation:l} ({ItemType} is not a well-known item type).",
+                Log.Debug("Not offering any element completions for {XmlLocation:l} ({ItemType} is not a well-known item type).",
                     location,
                     itemType
                 );
@@ -254,7 +254,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 GetExistingMetadataNames(replaceElement)
             );
 
-            Log.Verbose("Will offer element completions for {XmlLocation:l}", location);
+            Log.Debug("Will offer element completions for {XmlLocation:l}", location);
 
             const string universalMetadataPrefix = "*.";
             string metadataPrefix = String.Format("{0}.", itemType);

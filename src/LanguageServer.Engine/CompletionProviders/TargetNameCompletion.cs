@@ -63,7 +63,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             if (projectDocument == null)
                 throw new ArgumentNullException(nameof(projectDocument));
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             List<CompletionItem> completions = new List<CompletionItem>();
 
@@ -72,7 +72,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 XSAttribute attribute;
                 if (!location.CanCompleteAttributeValue(out attribute, onElementNamed: "Target") || !SupportedAttributeNames.Contains(attribute.Name))
                 {
-                    Log.Verbose("Not offering any completions for {XmlLocation:l} (not the value of a supported attribute on a 'Target' element).", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l} (not the value of a supported attribute on a 'Target' element).", location);
 
                     return null;
                 }
@@ -91,7 +91,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                     if (itemAtPosition == null)
                         return null;
 
-                    Log.Verbose("Completions will replace item {ItemValue} spanning [{ItemStartPosition}..{ItemEndPosition}) in MSBuild simple list expression {ListExpression}.",
+                    Log.Debug("Completions will replace item {ItemValue} spanning [{ItemStartPosition}..{ItemEndPosition}) in MSBuild simple list expression {ListExpression}.",
                         itemAtPosition.Value,
                         itemAtPosition.AbsoluteStart,
                         itemAtPosition.AbsoluteEnd,
@@ -112,7 +112,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             if (completions.Count == 0)
                 return null; // No completions provided.
 
-            Log.Verbose("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
+            Log.Debug("Offering {CompletionCount} completion(s) for {XmlLocation:l}", completions.Count, location);
 
             return new CompletionList(completions,
                 isIncomplete: false // Consider this list to be exhaustive

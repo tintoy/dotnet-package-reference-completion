@@ -63,13 +63,13 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
             bool isIncomplete = false;
             List<CompletionItem> completions = new List<CompletionItem>();
 
-            Log.Verbose("Evaluate completions for {XmlLocation:l}", location);
+            Log.Debug("Evaluate completions for {XmlLocation:l}", location);
 
             using (await projectDocument.Lock.ReaderLockAsync())
             {
                 if (location.CanCompleteAttributeValue(out XSAttribute attribute, "PackageReference", "Include", "Version"))
                 {
-                    Log.Verbose("Offering completions for value of attribute {AttributeName} of element {ElementName} @ {Position:l}",
+                    Log.Debug("Offering completions for value of attribute {AttributeName} of element {ElementName} @ {Position:l}",
                         attribute.Name,
                         attribute.Element.Name,
                         location.Position
@@ -86,7 +86,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                 {
                     if (replaceElement != null)
                     {
-                        Log.Verbose("Offering completions to replace child element @ {ReplaceRange} of {ElementName} @ {Position:l}",
+                        Log.Debug("Offering completions to replace child element @ {ReplaceRange} of {ElementName} @ {Position:l}",
                             replaceElement.Range,
                             "ItemGroup",
                             location.Position
@@ -94,7 +94,7 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                     }
                     else
                     {
-                        Log.Verbose("Offering completions for new child element of {ElementName} @ {Position:l}",
+                        Log.Debug("Offering completions for new child element of {ElementName} @ {Position:l}",
                             "ItemGroup",
                             location.Position
                         );
@@ -105,10 +105,10 @@ namespace MSBuildProjectTools.LanguageServer.CompletionProviders
                         completions.AddRange(elementCompletions);
                 }
                 else
-                    Log.Verbose("Not offering any completions for {XmlLocation:l}", location);
+                    Log.Debug("Not offering any completions for {XmlLocation:l}", location);
             }
 
-            Log.Verbose("Offering {CompletionCount} completions for {XmlLocation:l}", completions.Count, location);
+            Log.Debug("Offering {CompletionCount} completions for {XmlLocation:l}", completions.Count, location);
 
             if (completions.Count == 0)
                 return null;

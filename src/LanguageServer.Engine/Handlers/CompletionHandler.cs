@@ -6,6 +6,8 @@ using OmniSharp.Extensions.LanguageServer.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using NuGet.Versioning;
 using Serilog;
+using Serilog.Context;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -159,22 +161,27 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                     return NoCompletions;
 
                 Position position = parameters.Position.ToNative();
-                Log.Verbose("Completion requested for {Position:l}", position);
+                Log.Debug("Completion requested for {Position:l}", position);
 
                 location = projectDocument.XmlLocator.Inspect(position);
                 if (location == null)
                 {
-                    Log.Verbose("Completion short-circuited; nothing interesting at {Position:l}", position);
+                    Log.Debug("Completion short-circuited; nothing interesting at {Position:l}", position);
 
                     return NoCompletions;
                 }
 
-                Log.Verbose("Completion will target {XmlLocation:l}", location);
+                Log.Debug("Completion will target {XmlLocation:l}", location);
 
                 List<Task<CompletionList>> allProviderCompletions =
-                    Providers.Select(
-                        provider => provider.ProvideCompletions(location, projectDocument, cancellationToken)
-                    )
+                    Providers.Select(async provider =>
+                    {
+                        using (LogContext.PushProperty("ProviderName", provider.Name))
+                        using (Log.BeginTimedOperation("Invoke completion provider", level: LogEventLevel.Verbose))
+                        {
+                            return await provider.ProvideCompletions(location, projectDocument, cancellationToken);
+                        }
+                    })
                     .ToList();
 
                 while (allProviderCompletions.Count > 0)
@@ -208,7 +215,7 @@ namespace MSBuildProjectTools.LanguageServer.Handlers
                 }
             }
 
-            Log.Verbose("Offering a total of {CompletionCount} completions for {Location:l} (Exhaustive: {Exhaustive}).", completionItems.Count, location, !isIncomplete);
+            Log.Debug("Offering a total of {CompletionCount} completions for {Location:l} (Exhaustive: {Exhaustive}).", completionItems.Count, location, !isIncomplete);
 
             if (completionItems.Count == 0 && !isIncomplete)
                 return NoCompletions;

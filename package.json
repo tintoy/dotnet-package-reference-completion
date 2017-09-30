@@ -89,6 +89,7 @@
                                         "Error",
                                         "Warning",
                                         "Information",
+                                        "Debug",
                                         "Verbose"
                                     ],
                                     "default": "Information",
@@ -115,8 +116,8 @@
                                                 "Error",
                                                 "Warning",
                                                 "Information",
-                                                "Verbose",
-                                                "Debug"
+                                                "Debug",
+                                                "Verbose"
                                             ],
                                             "default": "Verbose",
                                             "description": "The minimum log level for Seq."
