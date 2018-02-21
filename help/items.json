@@ -105,7 +105,8 @@
     "Content": {
         "description": "Files that are not compiled, but may be embedded or published",
         "metadata": {
-            "CopyToPublishDirectory": "Copy file to publish directory (optional, boolean, default false)",
+            "CopyToOutputDirectory": "Copy file to output directory (optional, Always|Newer|Never, default Never)",
+            "CopyToPublishDirectory": "Copy file to publish directory (optional, Always|Newer|Never, default Never)",
             "PublishState": "Default, Included, Excluded, DataFile, or Prerequisite"
         }
     },
