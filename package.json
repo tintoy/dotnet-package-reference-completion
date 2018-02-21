@@ -2,7 +2,7 @@
     "name": "msbuild-project-tools",
     "displayName": "MSBuild project tools",
     "description": "Tools for working with MSBuild project files (such as auto-complete for package Ids / versions).",
-    "version": "0.2.27",
+    "version": "0.2.28",
     "settingsSchemaVersion": 1,
     "publisher": "tintoy",
     "license": "MIT",
@@ -178,6 +178,23 @@
                                         "Property"
                                     ],
                                     "description": "Types of objects defined in the current project to include when offering completions."
+                                }
+                            }
+                        },
+                        "msbuild": {
+                            "description": "Configuration for the MSBuild engine.",
+                            "type": "object",
+                            "default": {},
+                            "properties": {
+                                "extensionsPath": {
+                                    "description": "Override the default value of MSBuildExtensionsPath. You will need to close and reopen your project file for this setting to take effect.",
+                                    "type": "string",
+                                    "default": null
+                                },
+                                "extensionsPath32": {
+                                    "description": "Override the default value of MSBuildExtensionsPath32. You will need to close and reopen your project file for this setting to take effect.",
+                                    "type": "string",
+                                    "default": null
                                 }
                             }
                         },
