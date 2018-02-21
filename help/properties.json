@@ -477,6 +477,10 @@
     "InstallFrom": {
         "description": "Web, Unc, or Disk"
     },
+    "LangVersion": {
+        "description": "Which version of the target language (e.g. C# / VB) to use.",
+        "defaultValue": "latest"
+    },
     "LayoutDir": {
         "description": "Full path to a folder with package layout."
     },
